@@ -13,7 +13,7 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-        private Graphics g;
+        private Graphics graph;
         private Pen pen;
         private Brush brush;
         private int x = -1;
@@ -27,12 +27,13 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
-            g = panel1.CreateGraphics();
-            g.SmoothingMode = SmoothingMode.HighQuality;
+            graph = panel1.CreateGraphics();
+            graph.SmoothingMode = SmoothingMode.HighQuality;
             pen = new Pen(Color.Red, 2);
             brush = new SolidBrush(Color.Blue);
             pen.StartCap = pen.EndCap = LineCap.Round;
             status = process.Nothing;
+            ListStatus.SelectedIndex = 0;
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -44,14 +45,14 @@ namespace WindowsFormsApp1
                     switch (status)
                     {
                         case process.MultiLineString:
-                            g.DrawLine(pen, new Point(x, y), e.Location);
+                            graph.DrawLine(pen, new Point(x, y), e.Location);
                             x = e.X;
                             y = e.Y;
                             break;
                         case process.MultiPolygon:
                             polygon.Add(e.Location);
                             if (++polygonCount >= 3)
-                                g.FillPolygon(brush, polygon.ToArray());
+                                graph.FillPolygon(brush, polygon.ToArray());
                             break;
                         default: break;
                     }
@@ -62,23 +63,26 @@ namespace WindowsFormsApp1
                     {
                         case process.MultiLineString:
                             drawing = false;
+                            panel1.Cursor = Cursors.Default;
                             break;
                         case process.MultiPolygon:
                             polygonCount = 0;
                             polygon = null;
                             drawing = false;
+                            panel1.Cursor = Cursors.Default;
                             break;
                         default: break;
                     }
                 }
             }
-            else if(!drawing && e.Button == MouseButtons.Left)
+            else if(!drawing && e.Button == MouseButtons.Left && status != process.Nothing)
             {
                 drawing = true;
+                panel1.Cursor = Cursors.Cross;
                 switch (status)
                 {
                     case process.MultiPoint:
-                        g.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
+                        graph.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
                         break;
                     case process.FreePen:
                     case process.MultiLineString:
@@ -101,7 +105,7 @@ namespace WindowsFormsApp1
                 switch (status)
                 {
                     case process.FreePen:
-                        g.DrawLine(pen, new Point(x, y), e.Location);
+                        graph.DrawLine(pen, new Point(x, y), e.Location);
                         x = e.X;
                         y = e.Y;
                         break;
@@ -121,6 +125,7 @@ namespace WindowsFormsApp1
                         break;
                     default:
                         drawing = false;
+                        panel1.Cursor = Cursors.Default;
                         break;
                 }
             }
