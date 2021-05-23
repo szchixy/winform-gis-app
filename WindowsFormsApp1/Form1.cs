@@ -21,7 +21,7 @@ namespace WindowsFormsApp1
         private enum process {Nothing, FreePen, MultiPoint, MultiLineString, MultiPolygon};
         private process status;
         private bool drawing = false;
-        List<Point> polygon = null;
+        private List<Point> polygon = null;
         private int polygonCount = 0;
 
         public Form1()
