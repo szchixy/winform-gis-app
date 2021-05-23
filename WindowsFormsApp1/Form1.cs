@@ -28,6 +28,7 @@ namespace WindowsFormsApp1
         private List<Point> pointList = null;
         private int pointListCount = 0;
         private MultiPoint multiPoint = null;
+        private MultiLineString multiLineString = null;
 
         public Form1()
         {
@@ -61,6 +62,12 @@ namespace WindowsFormsApp1
                 graph.DrawEllipse(pen1, new Rectangle(points.point[i].X - 1, points.point[i].Y - 1, 2, 2));
         }
 
+        private void DrawLineString(Points points)
+        {
+            Pen pen1 = new Pen(points.color, 2);
+            graph.DrawLines(pen, points.point.ToArray());
+        }
+
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
             if(drawing)
@@ -78,6 +85,7 @@ namespace WindowsFormsApp1
                             break;
                         case process.MultiLineString:
                             graph.DrawLine(pen, new Point(x, y), e.Location);
+                            pointList.Add(e.Location);
                             x = e.X;
                             y = e.Y;
                             break;
@@ -102,11 +110,17 @@ namespace WindowsFormsApp1
                             if (multiPoint == null)
                                 multiPoint = new MultiPoint(new Points(pointList, penColor));
                             else
-                                multiPoint.points.Add(new Points(pointList, penColor));
+                                multiPoint.point.Add(new Points(pointList, penColor));
                             pointListCount = 0;
                             pointList = null;
                             break;
                         case process.MultiLineString:
+                            if (multiLineString == null)
+                                multiLineString = new MultiLineString(new Points(pointList, penColor));
+                            else
+                                multiLineString.lineString.Add(new Points(pointList, penColor));
+                            pointListCount = 0;
+                            pointList = null;
                             break;
                         case process.MultiPolygon:
                             pointListCount = 0;
@@ -128,10 +142,13 @@ namespace WindowsFormsApp1
                     case process.MultiPoint:
                         graph.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
                         pointList = new List<Point> { e.Location };
-                        pointListCount = 1;
                         break;
                     case process.FreePen:
+                        x = e.X;
+                        y = e.Y;
+                        break;
                     case process.MultiLineString:
+                        pointList = new List<Point> { e.Location };
                         x = e.X;
                         y = e.Y;
                         break;
@@ -178,12 +195,16 @@ namespace WindowsFormsApp1
             }
 
             // 测试
-            if(!drawing && status == process.Nothing && e.Button == MouseButtons.Right && multiPoint != null)
+            if(!drawing && status == process.Nothing && e.Button == MouseButtons.Right)
             {
                 //for(int i=0;i<1000;i++)
                 //    FuncTest();
-                for (int i = 0; i < multiPoint.points.Count; i++)
-                    DrawPoints(multiPoint.points[i]);
+                if(multiPoint != null)
+                    for (int i = 0; i < multiPoint.point.Count; i++)
+                        DrawPoints(multiPoint.point[i]);
+                if(multiLineString != null)
+                    for (int i = 0; i < multiLineString.lineString.Count; i++)
+                        DrawLineString(multiLineString.lineString[i]);
             }
         }
 
@@ -218,24 +239,24 @@ namespace WindowsFormsApp1
 
     public class MultiPoint
     {
-        public List<Points> points = null;
+        public List<Points> point = null;
         public MultiPoint(Points points1)
         {
-            points = new List<Points> { points1};
+            point = new List<Points> { points1 };
         }
     }
 
     public class MultiLineString
     {
-        public List<Points> lineString;
-        public int num;
-        public Color color;
+        public List<Points> lineString = null;
+        public MultiLineString(Points points1)
+        {
+            lineString = new List<Points> { points1 };
+        }
     }
 
     public class MultiPolygon
     {
         public List<Points> polygon;
-        public int num;
-        public Color color;
     }
 }
