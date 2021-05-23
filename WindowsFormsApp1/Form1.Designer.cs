@@ -29,48 +29,51 @@ namespace WindowsFormsApp1
         /// </summary>
         private void InitializeComponent()
         {
-            this.ListStatus = new System.Windows.Forms.ComboBox();
-            this.LabelStatus = new System.Windows.Forms.Label();
+            this.listStatus = new System.Windows.Forms.ComboBox();
+            this.labelStatus = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.buttonOpen = new System.Windows.Forms.Button();
+            this.buttonSave = new System.Windows.Forms.Button();
+            this.boxColor = new System.Windows.Forms.PictureBox();
+            this.labelColor = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.boxColor)).BeginInit();
             this.SuspendLayout();
             // 
-            // ListStatus
+            // listStatus
             // 
-            this.ListStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ListStatus.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.ListStatus.FormattingEnabled = true;
-            this.ListStatus.Items.AddRange(new object[] {
+            this.listStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.listStatus.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.listStatus.FormattingEnabled = true;
+            this.listStatus.Items.AddRange(new object[] {
             "无",
             "手绘",
             "点",
             "线",
             "面"});
-            this.ListStatus.Location = new System.Drawing.Point(60, 8);
-            this.ListStatus.Margin = new System.Windows.Forms.Padding(0);
-            this.ListStatus.Name = "ListStatus";
-            this.ListStatus.Size = new System.Drawing.Size(81, 29);
-            this.ListStatus.TabIndex = 2;
-            this.ListStatus.Tag = "无";
-            this.ListStatus.SelectedIndexChanged += new System.EventHandler(this.ListStatus_SelectedIndexChanged);
+            this.listStatus.Location = new System.Drawing.Point(243, 6);
+            this.listStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.listStatus.Name = "listStatus";
+            this.listStatus.Size = new System.Drawing.Size(81, 29);
+            this.listStatus.TabIndex = 2;
+            this.listStatus.Tag = "无";
+            this.listStatus.SelectedIndexChanged += new System.EventHandler(this.ListStatus_SelectedIndexChanged);
             // 
-            // LabelStatus
+            // labelStatus
             // 
-            this.LabelStatus.AutoSize = true;
-            this.LabelStatus.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.LabelStatus.Location = new System.Drawing.Point(11, 11);
-            this.LabelStatus.Name = "LabelStatus";
-            this.LabelStatus.Size = new System.Drawing.Size(46, 21);
-            this.LabelStatus.TabIndex = 3;
-            this.LabelStatus.Text = "工具:";
+            this.labelStatus.AutoSize = true;
+            this.labelStatus.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelStatus.Location = new System.Drawing.Point(194, 9);
+            this.labelStatus.Name = "labelStatus";
+            this.labelStatus.Size = new System.Drawing.Size(46, 21);
+            this.labelStatus.TabIndex = 3;
+            this.labelStatus.Text = "工具:";
             // 
             // splitContainer1
             // 
@@ -83,10 +86,13 @@ namespace WindowsFormsApp1
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.pictureBox1);
-            this.splitContainer1.Panel1.Controls.Add(this.ListStatus);
-            this.splitContainer1.Panel1.Controls.Add(this.label1);
-            this.splitContainer1.Panel1.Controls.Add(this.LabelStatus);
+            this.splitContainer1.Panel1.Controls.Add(this.textBox1);
+            this.splitContainer1.Panel1.Controls.Add(this.buttonOpen);
+            this.splitContainer1.Panel1.Controls.Add(this.buttonSave);
+            this.splitContainer1.Panel1.Controls.Add(this.boxColor);
+            this.splitContainer1.Panel1.Controls.Add(this.listStatus);
+            this.splitContainer1.Panel1.Controls.Add(this.labelColor);
+            this.splitContainer1.Panel1.Controls.Add(this.labelStatus);
             // 
             // splitContainer1.Panel2
             // 
@@ -95,15 +101,47 @@ namespace WindowsFormsApp1
             this.splitContainer1.SplitterDistance = 42;
             this.splitContainer1.TabIndex = 4;
             // 
-            // pictureBox1
+            // buttonOpen
             // 
-            this.pictureBox1.BackColor = System.Drawing.Color.Black;
-            this.pictureBox1.Location = new System.Drawing.Point(239, 8);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(28, 29);
-            this.pictureBox1.TabIndex = 5;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.buttonOpen.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonOpen.Location = new System.Drawing.Point(12, 6);
+            this.buttonOpen.Name = "buttonOpen";
+            this.buttonOpen.Size = new System.Drawing.Size(75, 29);
+            this.buttonOpen.TabIndex = 6;
+            this.buttonOpen.Text = "打开";
+            this.buttonOpen.UseVisualStyleBackColor = true;
+            this.buttonOpen.Click += new System.EventHandler(this.buttonOpen_Click);
+            // 
+            // buttonSave
+            // 
+            this.buttonSave.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttonSave.Location = new System.Drawing.Point(104, 6);
+            this.buttonSave.Name = "buttonSave";
+            this.buttonSave.Size = new System.Drawing.Size(75, 29);
+            this.buttonSave.TabIndex = 6;
+            this.buttonSave.Text = "保存";
+            this.buttonSave.UseVisualStyleBackColor = true;
+            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
+            // 
+            // boxColor
+            // 
+            this.boxColor.BackColor = System.Drawing.Color.Black;
+            this.boxColor.Location = new System.Drawing.Point(398, 6);
+            this.boxColor.Name = "boxColor";
+            this.boxColor.Size = new System.Drawing.Size(28, 29);
+            this.boxColor.TabIndex = 5;
+            this.boxColor.TabStop = false;
+            this.boxColor.Click += new System.EventHandler(this.boxColor_Click);
+            // 
+            // labelColor
+            // 
+            this.labelColor.AutoSize = true;
+            this.labelColor.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelColor.Location = new System.Drawing.Point(346, 9);
+            this.labelColor.Name = "labelColor";
+            this.labelColor.Size = new System.Drawing.Size(46, 21);
+            this.labelColor.TabIndex = 3;
+            this.labelColor.Text = "颜色:";
             // 
             // panel1
             // 
@@ -119,15 +157,13 @@ namespace WindowsFormsApp1
             this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
             this.panel1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseUp);
             // 
-            // label1
+            // textBox1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(187, 11);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(46, 21);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "颜色:";
+            this.textBox1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.textBox1.Location = new System.Drawing.Point(577, 12);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(339, 23);
+            this.textBox1.TabIndex = 7;
             // 
             // Form1
             // 
@@ -145,19 +181,22 @@ namespace WindowsFormsApp1
             this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.boxColor)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private System.Windows.Forms.ComboBox ListStatus;
-        private System.Windows.Forms.Label LabelStatus;
+        private System.Windows.Forms.ComboBox listStatus;
+        private System.Windows.Forms.Label labelStatus;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ColorDialog colorDialog1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.PictureBox boxColor;
+        private System.Windows.Forms.Label labelColor;
+        private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.Button buttonOpen;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 

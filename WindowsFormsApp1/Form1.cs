@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace WindowsFormsApp1
 {
@@ -39,8 +40,8 @@ namespace WindowsFormsApp1
             brush = new SolidBrush(color);
             pen.StartCap = pen.EndCap = LineCap.Round;
             status = process.Nothing;
-            ListStatus.SelectedIndex = 0;
-            pictureBox1.BackColor = color;
+            listStatus.SelectedIndex = 0;
+            boxColor.BackColor = color;
         }
 
         private void DrawPoints(Points points)
@@ -98,8 +99,8 @@ namespace WindowsFormsApp1
                 else if(e.Button == MouseButtons.Right)
                 {
                     drawing = false;
-                    ListStatus.Enabled = true;
-                    pictureBox1.Enabled = true;
+                    listStatus.Enabled = true;
+                    boxColor.Enabled = true;
                     switch (status)
                     {
                         case process.MultiPoint:
@@ -136,8 +137,8 @@ namespace WindowsFormsApp1
                 // 左键开始
                 //
                 drawing = true;
-                ListStatus.Enabled = false;
-                pictureBox1.Enabled = false;
+                listStatus.Enabled = false;
+                boxColor.Enabled = false;
                 switch (status)
                 {
                     case process.MultiPoint:
@@ -192,8 +193,8 @@ namespace WindowsFormsApp1
                         break;
                     default:
                         drawing = false;
-                        ListStatus.Enabled = true;
-                        pictureBox1.Enabled = true;
+                        listStatus.Enabled = true;
+                        boxColor.Enabled = true;
                         break;
                 }
             }
@@ -201,7 +202,7 @@ namespace WindowsFormsApp1
 
         private void ListStatus_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch(ListStatus.SelectedIndex)
+            switch(listStatus.SelectedIndex)
             {
                 case 0: status = process.Nothing; break;
                 case 1: status = process.FreePen; break;
@@ -229,15 +230,38 @@ namespace WindowsFormsApp1
                     DrawPolygon(multiPolygon.polygon[i]);
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void boxColor_Click(object sender, EventArgs e)
         {
             DialogResult dr = colorDialog1.ShowDialog();
             if (dr == DialogResult.OK)
             {
                 color = colorDialog1.Color;
-                pictureBox1.BackColor = color;
+                boxColor.BackColor = color;
                 pen.Color = color;
                 brush = new SolidBrush(color);
+            }
+        }
+
+        private void buttonOpen_Click(object sender, EventArgs e)
+        {
+            //using(StreamReader sr = new StreamReader("input.json"))
+            //{
+            //    string multiPointJson = sr.ReadToEnd();
+            //    textBox1.Text = multiPointJson;
+            //}
+        }
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            if(multiPoint != null)
+            {
+                //using(StreamWriter sw = new StreamWriter("result.json"))
+                //{
+                //    sw.Write(multiPointJson);
+                //}
+
+                
+                //textBox1.Text = multiPointJson;
             }
         }
     }
