@@ -16,8 +16,7 @@ namespace WindowsFormsApp1
         public Graphics graph;
         private Pen pen;
         private Brush brush;
-        Color penColor = Color.Red;
-        Color brushColor = Color.Blue;
+        Color color = Color.Red;
         private int x = -1;
         private int y = -1;
         
@@ -36,8 +35,8 @@ namespace WindowsFormsApp1
             InitializeComponent();
             graph = panel1.CreateGraphics();
             graph.SmoothingMode = SmoothingMode.HighQuality;
-            pen = new Pen(penColor, 2);
-            brush = new SolidBrush(brushColor);
+            pen = new Pen(color, 2);
+            brush = new SolidBrush(color);
             pen.StartCap = pen.EndCap = LineCap.Round;
             status = process.Nothing;
             ListStatus.SelectedIndex = 0;
@@ -98,7 +97,7 @@ namespace WindowsFormsApp1
                             pointList.Add(e.Location);
                             ++pointListCount;
                             if (pointListCount == 2)
-                                graph.DrawLine(new Pen(brushColor, 2), new Point(x, y), e.Location);
+                                graph.DrawLine(new Pen(color, 2), new Point(x, y), e.Location);
                             else if (pointListCount >= 3)
                                 graph.FillPolygon(brush, pointList.ToArray());
                             break;
@@ -116,25 +115,25 @@ namespace WindowsFormsApp1
                     {
                         case process.MultiPoint:
                             if (multiPoint == null)
-                                multiPoint = new MultiPoint(new Points(pointList, penColor));
+                                multiPoint = new MultiPoint(new Points(pointList, color));
                             else
-                                multiPoint.point.Add(new Points(pointList, penColor));
+                                multiPoint.point.Add(new Points(pointList, color));
                             pointListCount = 0;
                             pointList = null;
                             break;
                         case process.MultiLineString:
                             if (multiLineString == null)
-                                multiLineString = new MultiLineString(new Points(pointList, penColor));
+                                multiLineString = new MultiLineString(new Points(pointList, color));
                             else
-                                multiLineString.lineString.Add(new Points(pointList, penColor));
+                                multiLineString.lineString.Add(new Points(pointList, color));
                             pointListCount = 0;
                             pointList = null;
                             break;
                         case process.MultiPolygon:
                             if (multiPolygon == null)
-                                multiPolygon = new MultiPolygon(new Points(pointList, brushColor));
+                                multiPolygon = new MultiPolygon(new Points(pointList, color));
                             else
-                                multiPolygon.polygon.Add(new Points(pointList, brushColor));
+                                multiPolygon.polygon.Add(new Points(pointList, color));
                             pointListCount = 0;
                             pointList = null;
                             break;
@@ -207,22 +206,6 @@ namespace WindowsFormsApp1
                         break;
                 }
             }
-
-            // 测试
-            if(!drawing && status == process.Nothing && e.Button == MouseButtons.Right)
-            {
-                //for(int i=0;i<1000;i++)
-                //    FuncTest();
-                if(multiPoint != null)
-                    for (int i = 0; i < multiPoint.point.Count; i++)
-                        DrawPoints(multiPoint.point[i]);
-                if(multiLineString != null)
-                    for (int i = 0; i < multiLineString.lineString.Count; i++)
-                        DrawLineString(multiLineString.lineString[i]);
-                if (multiPolygon != null)
-                    for (int i = 0; i < multiPolygon.polygon.Count; i++)
-                        DrawPolygon(multiPolygon.polygon[i]);
-            }
         }
 
         private void ListStatus_SelectedIndexChanged(object sender, EventArgs e)
@@ -240,6 +223,21 @@ namespace WindowsFormsApp1
                 panel1.Cursor = Cursors.Cross;
             else
                 panel1.Cursor = Cursors.Default;
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+            //for(int i=0;i<1000;i++)
+            //    FuncTest();
+            if (multiPoint != null)
+                for (int i = 0; i < multiPoint.point.Count; i++)
+                    DrawPoints(multiPoint.point[i]);
+            if (multiLineString != null)
+                for (int i = 0; i < multiLineString.lineString.Count; i++)
+                    DrawLineString(multiLineString.lineString[i]);
+            if (multiPolygon != null)
+                for (int i = 0; i < multiPolygon.polygon.Count; i++)
+                    DrawPolygon(multiPolygon.polygon[i]);
         }
     }
 
