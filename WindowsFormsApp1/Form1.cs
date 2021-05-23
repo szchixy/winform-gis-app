@@ -29,6 +29,7 @@ namespace WindowsFormsApp1
         private int pointListCount = 0;
         private MultiPoint multiPoint = null;
         private MultiLineString multiLineString = null;
+        private MultiPolygon multiPolygon = null;
 
         public Form1()
         {
@@ -64,8 +65,12 @@ namespace WindowsFormsApp1
 
         private void DrawLineString(Points points)
         {
-            Pen pen1 = new Pen(points.color, 2);
-            graph.DrawLines(pen, points.point.ToArray());
+            graph.DrawLines(new Pen(points.color, 2), points.point.ToArray());
+        }
+
+        private void DrawPolygon(Points points)
+        {
+            graph.FillPolygon(new SolidBrush(points.color), points.point.ToArray());
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -91,7 +96,10 @@ namespace WindowsFormsApp1
                             break;
                         case process.MultiPolygon:
                             pointList.Add(e.Location);
-                            if (++pointListCount >= 3)
+                            ++pointListCount;
+                            if (pointListCount == 2)
+                                graph.DrawLine(new Pen(brushColor, 2), new Point(x, y), e.Location);
+                            else if (pointListCount >= 3)
                                 graph.FillPolygon(brush, pointList.ToArray());
                             break;
                         default: break;
@@ -123,6 +131,10 @@ namespace WindowsFormsApp1
                             pointList = null;
                             break;
                         case process.MultiPolygon:
+                            if (multiPolygon == null)
+                                multiPolygon = new MultiPolygon(new Points(pointList, brushColor));
+                            else
+                                multiPolygon.polygon.Add(new Points(pointList, brushColor));
                             pointListCount = 0;
                             pointList = null;
                             break;
@@ -153,8 +165,10 @@ namespace WindowsFormsApp1
                         y = e.Y;
                         break;
                     case process.MultiPolygon:
-                        pointList = new List<Point>{e.Location};
+                        pointList = new List<Point> { e.Location };
                         pointListCount = 1;
+                        x = e.X;
+                        y = e.Y;
                         break;
                     default: break;
                 }
@@ -205,6 +219,9 @@ namespace WindowsFormsApp1
                 if(multiLineString != null)
                     for (int i = 0; i < multiLineString.lineString.Count; i++)
                         DrawLineString(multiLineString.lineString[i]);
+                if (multiPolygon != null)
+                    for (int i = 0; i < multiPolygon.polygon.Count; i++)
+                        DrawPolygon(multiPolygon.polygon[i]);
             }
         }
 
@@ -257,6 +274,10 @@ namespace WindowsFormsApp1
 
     public class MultiPolygon
     {
-        public List<Points> polygon;
+        public List<Points> polygon = null;
+        public MultiPolygon(Points points1)
+        {
+            polygon = new List<Points> { points1 };
+        }
     }
 }
