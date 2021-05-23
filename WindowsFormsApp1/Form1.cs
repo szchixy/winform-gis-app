@@ -16,7 +16,7 @@ namespace WindowsFormsApp1
         public Graphics graph;
         private Pen pen;
         private Brush brush;
-        Color color = Color.Red;
+        Color color = Color.Black;
         private int x = -1;
         private int y = -1;
         
@@ -40,6 +40,7 @@ namespace WindowsFormsApp1
             pen.StartCap = pen.EndCap = LineCap.Round;
             status = process.Nothing;
             ListStatus.SelectedIndex = 0;
+            pictureBox1.BackColor = color;
         }
 
         private void FuncTest()
@@ -238,6 +239,18 @@ namespace WindowsFormsApp1
             if (multiPolygon != null)
                 for (int i = 0; i < multiPolygon.polygon.Count; i++)
                     DrawPolygon(multiPolygon.polygon[i]);
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = colorDialog1.ShowDialog();
+            if (dr == DialogResult.OK)
+            {
+                color = colorDialog1.Color;
+                pictureBox1.BackColor = color;
+                pen.Color = color;
+                brush = new SolidBrush(color);
+            }
         }
     }
 
