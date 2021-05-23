@@ -43,19 +43,6 @@ namespace WindowsFormsApp1
             pictureBox1.BackColor = color;
         }
 
-        private void FuncTest()
-        {
-            int time = unchecked((int)DateTime.Now.Ticks);
-            List<Point> pointList = new List<Point> {
-                new Point(new Random(time*1).Next(0,500),new Random(time*5).Next(0,500)),
-                new Point(new Random(time*2).Next(0,500),new Random(time*6).Next(0,500)),
-                new Point(new Random(time*3).Next(0,500),new Random(time*7).Next(0,500)),
-                new Point(new Random(time*4).Next(0,500),new Random(time*8).Next(0,500)),
-            };
-            Points points = new Points(pointList, Color.Green);
-            DrawPoints(points);
-        }
-
         private void DrawPoints(Points points)
         {
             Pen pen1 = new Pen(points.color, 2);
@@ -112,6 +99,7 @@ namespace WindowsFormsApp1
                 {
                     drawing = false;
                     ListStatus.Enabled = true;
+                    pictureBox1.Enabled = true;
                     switch (status)
                     {
                         case process.MultiPoint:
@@ -149,6 +137,7 @@ namespace WindowsFormsApp1
                 //
                 drawing = true;
                 ListStatus.Enabled = false;
+                pictureBox1.Enabled = false;
                 switch (status)
                 {
                     case process.MultiPoint:
@@ -204,6 +193,7 @@ namespace WindowsFormsApp1
                     default:
                         drawing = false;
                         ListStatus.Enabled = true;
+                        pictureBox1.Enabled = true;
                         break;
                 }
             }
@@ -228,8 +218,6 @@ namespace WindowsFormsApp1
 
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            //for(int i=0;i<1000;i++)
-            //    FuncTest();
             if (multiPoint != null)
                 for (int i = 0; i < multiPoint.point.Count; i++)
                     DrawPoints(multiPoint.point[i]);
