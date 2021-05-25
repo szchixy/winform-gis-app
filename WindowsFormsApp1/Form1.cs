@@ -255,7 +255,7 @@ namespace WindowsFormsApp1
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if (multiPoint != null && multiLineString != null && multiPolygon != null)
+            if (multiPoint != null || multiLineString != null || multiPolygon != null)
             {
                 dynamic featureCollection = new JObject();
                 featureCollection.type = "FeatureCollection";
@@ -274,9 +274,12 @@ namespace WindowsFormsApp1
                 string resultJsonText = JsonConvert.SerializeObject(featureCollection);
                 textBox1.Text = resultJsonText;
 
-                using (StreamWriter sw = new StreamWriter("result.json"))
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    sw.Write(resultJsonText);
+                    using (StreamWriter sw = new StreamWriter(saveFileDialog1.FileName))
+                    {
+                        sw.Write(resultJsonText);
+                    }
                 }
             }
         }
