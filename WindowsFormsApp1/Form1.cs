@@ -246,11 +246,14 @@ namespace WindowsFormsApp1
 
         private void buttonOpen_Click(object sender, EventArgs e)
         {
-            //using(StreamReader sr = new StreamReader("input.json"))
-            //{
-            //    string multiPointJson = sr.ReadToEnd();
-            //    textBox1.Text = multiPointJson;
-            //}
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                using (StreamReader sr = new StreamReader(openFileDialog1.FileName))
+                {
+                    string inputJsonText = sr.ReadToEnd();
+                    textBox1.Text = inputJsonText;
+                }
+            }
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
