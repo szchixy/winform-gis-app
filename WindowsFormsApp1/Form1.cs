@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace WindowsFormsApp1
 {
@@ -253,17 +255,98 @@ namespace WindowsFormsApp1
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if(multiPoint != null)
+            if (multiPoint != null && multiLineString != null && multiPolygon != null)
             {
-                //using(StreamWriter sw = new StreamWriter("result.json"))
-                //{
-                //    sw.Write(multiPointJson);
-                //}
+                dynamic featureCollection = new JObject();
+                featureCollection.type = "FeatureCollection";
+                featureCollection.features = new JArray();
 
-                
-                //textBox1.Text = multiPointJson;
+                if (multiPoint != null)
+                    for (int i = 0; i < multiPoint.point.Count; i++)
+                        featureCollection.features.Add(MultiPoint2Json(multiPoint.point[i]));
+                if (multiLineString != null)
+                    for (int i = 0; i < multiLineString.lineString.Count; i++)
+                        featureCollection.features.Add(MultiLineString2Json(multiLineString.lineString[i]));
+                if (multiPolygon != null)
+                    for (int i = 0; i < multiPolygon.polygon.Count; i++)
+                        featureCollection.features.Add(MultiPolygon2Json(multiPolygon.polygon[i]));
+
+                string resultJsonText = JsonConvert.SerializeObject(featureCollection);
+                textBox1.Text = resultJsonText;
+
+                using (StreamWriter sw = new StreamWriter("result.json"))
+                {
+                    sw.Write(resultJsonText);
+                }
             }
         }
+
+        private JObject MultiPoint2Json(Points points)
+        {
+            dynamic jo = new JObject();
+            jo.type = "Feature";
+            jo.properties = new JObject();
+            jo.properties.color = new JArray();
+            jo.properties.color.Add(points.color.R);
+            jo.properties.color.Add(points.color.G);
+            jo.properties.color.Add(points.color.B);
+            jo.geometry = new JObject();
+            jo.geometry.type = "MultiPoint";
+            jo.geometry.coordinates = new JArray();
+            for (int i = 0; i < points.point.Count; i++)
+            {
+                dynamic point = new JArray();
+                point.Add(points.point[i].X);
+                point.Add(points.point[i].Y);
+                jo.geometry.coordinates.Add(point);
+            }
+            return jo;
+        }
+
+        private JObject MultiLineString2Json(Points points)
+        {
+            dynamic jo = new JObject();
+            jo.type = "Feature";
+            jo.properties = new JObject();
+            jo.properties.color = new JArray();
+            jo.properties.color.Add(points.color.R);
+            jo.properties.color.Add(points.color.G);
+            jo.properties.color.Add(points.color.B);
+            jo.geometry = new JObject();
+            jo.geometry.type = "MultiLineString";
+            jo.geometry.coordinates = new JArray();
+            for (int i = 0; i < points.point.Count; i++)
+            {
+                dynamic point = new JArray();
+                point.Add(points.point[i].X);
+                point.Add(points.point[i].Y);
+                jo.geometry.coordinates.Add(point);
+            }
+            return jo;
+        }
+
+        private JObject MultiPolygon2Json(Points points)
+        {
+            dynamic jo = new JObject();
+            jo.type = "Feature";
+            jo.properties = new JObject();
+            jo.properties.color = new JArray();
+            jo.properties.color.Add(points.color.R);
+            jo.properties.color.Add(points.color.G);
+            jo.properties.color.Add(points.color.B);
+            jo.geometry = new JObject();
+            jo.geometry.type = "MultiPolygon";
+            jo.geometry.coordinates = new JArray();
+            for (int i = 0; i < points.point.Count; i++)
+            {
+                dynamic point = new JArray();
+                point.Add(points.point[i].X);
+                point.Add(points.point[i].Y);
+                jo.geometry.coordinates.Add(point);
+            }
+            return jo;
+        }
+
     }
 
     public class Points
