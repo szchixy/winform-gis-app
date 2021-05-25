@@ -23,15 +23,15 @@ namespace WindowsFormsApp1
         private int x = -1;
         private int y = -1;
         
-        private enum process {Nothing, FreePen, MultiPoint, MultiLineString, MultiPolygon};
+        private enum process {Nothing, FreePen, MultiPoint, LineString, Polygon};
         private process status;
         private bool drawing = false;
 
         private List<Point> pointList = null;
         private int pointListCount = 0;
         private MultiPoint multiPoint = null;
-        private MultiLineString multiLineString = null;
-        private MultiPolygon multiPolygon = null;
+        private LineString lineString = null;
+        private Polygon polygon = null;
 
         private string inputJsonText = null;
         private string outputJsonText = null;
@@ -81,13 +81,13 @@ namespace WindowsFormsApp1
                             graph.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
                             pointList.Add(e.Location);
                             break;
-                        case process.MultiLineString:
+                        case process.LineString:
                             graph.DrawLine(pen, new Point(x, y), e.Location);
                             pointList.Add(e.Location);
                             x = e.X;
                             y = e.Y;
                             break;
-                        case process.MultiPolygon:
+                        case process.Polygon:
                             pointList.Add(e.Location);
                             ++pointListCount;
                             if (pointListCount == 2)
@@ -116,19 +116,19 @@ namespace WindowsFormsApp1
                             pointListCount = 0;
                             pointList = null;
                             break;
-                        case process.MultiLineString:
-                            if (multiLineString == null)
-                                multiLineString = new MultiLineString(new Points(pointList, color));
+                        case process.LineString:
+                            if (lineString == null)
+                                lineString = new LineString(new Points(pointList, color));
                             else
-                                multiLineString.lineString.Add(new Points(pointList, color));
+                                lineString.lineString.Add(new Points(pointList, color));
                             pointListCount = 0;
                             pointList = null;
                             break;
-                        case process.MultiPolygon:
-                            if (multiPolygon == null)
-                                multiPolygon = new MultiPolygon(new Points(pointList, color));
+                        case process.Polygon:
+                            if (polygon == null)
+                                polygon = new Polygon(new Points(pointList, color));
                             else
-                                multiPolygon.polygon.Add(new Points(pointList, color));
+                                polygon.polygon.Add(new Points(pointList, color));
                             pointListCount = 0;
                             pointList = null;
                             break;
@@ -154,12 +154,12 @@ namespace WindowsFormsApp1
                         x = e.X;
                         y = e.Y;
                         break;
-                    case process.MultiLineString:
+                    case process.LineString:
                         pointList = new List<Point> { e.Location };
                         x = e.X;
                         y = e.Y;
                         break;
-                    case process.MultiPolygon:
+                    case process.Polygon:
                         pointList = new List<Point> { e.Location };
                         pointListCount = 1;
                         x = e.X;
@@ -193,8 +193,8 @@ namespace WindowsFormsApp1
                 switch (status)
                 {
                     case process.MultiPoint:
-                    case process.MultiLineString:
-                    case process.MultiPolygon:
+                    case process.LineString:
+                    case process.Polygon:
                         break;
                     default:
                         drawing = false;
@@ -212,8 +212,8 @@ namespace WindowsFormsApp1
                 case 0: status = process.Nothing; break;
                 case 1: status = process.FreePen; break;
                 case 2: status = process.MultiPoint; break;
-                case 3: status = process.MultiLineString; break;
-                case 4: status = process.MultiPolygon; break;
+                case 3: status = process.LineString; break;
+                case 4: status = process.Polygon; break;
                 default: break;
             }
             if(status != process.Nothing)
@@ -227,12 +227,12 @@ namespace WindowsFormsApp1
             if (multiPoint != null)
                 for (int i = 0; i < multiPoint.point.Count; i++)
                     DrawPoints(multiPoint.point[i]);
-            if (multiLineString != null)
-                for (int i = 0; i < multiLineString.lineString.Count; i++)
-                    DrawLineString(multiLineString.lineString[i]);
-            if (multiPolygon != null)
-                for (int i = 0; i < multiPolygon.polygon.Count; i++)
-                    DrawPolygon(multiPolygon.polygon[i]);
+            if (lineString != null)
+                for (int i = 0; i < lineString.lineString.Count; i++)
+                    DrawLineString(lineString.lineString[i]);
+            if (polygon != null)
+                for (int i = 0; i < polygon.polygon.Count; i++)
+                    DrawPolygon(polygon.polygon[i]);
         }
 
         private void boxColor_Click(object sender, EventArgs e)
@@ -261,7 +261,7 @@ namespace WindowsFormsApp1
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if (multiPoint != null || multiLineString != null || multiPolygon != null)
+            if (multiPoint != null || lineString != null || polygon != null)
             {
                 dynamic featureCollection = new JObject();
                 featureCollection.type = "FeatureCollection";
@@ -270,12 +270,12 @@ namespace WindowsFormsApp1
                 if (multiPoint != null)
                     for (int i = 0; i < multiPoint.point.Count; i++)
                         featureCollection.features.Add(MultiPoint2Json(multiPoint.point[i]));
-                if (multiLineString != null)
-                    for (int i = 0; i < multiLineString.lineString.Count; i++)
-                        featureCollection.features.Add(MultiLineString2Json(multiLineString.lineString[i]));
-                if (multiPolygon != null)
-                    for (int i = 0; i < multiPolygon.polygon.Count; i++)
-                        featureCollection.features.Add(MultiPolygon2Json(multiPolygon.polygon[i]));
+                if (lineString != null)
+                    for (int i = 0; i < lineString.lineString.Count; i++)
+                        featureCollection.features.Add(MultiLineString2Json(lineString.lineString[i]));
+                if (polygon != null)
+                    for (int i = 0; i < polygon.polygon.Count; i++)
+                        featureCollection.features.Add(MultiPolygon2Json(polygon.polygon[i]));
 
                 outputJsonText = JsonConvert.SerializeObject(featureCollection);
                 textBox1.Text = outputJsonText;
@@ -378,19 +378,19 @@ namespace WindowsFormsApp1
         }
     }
 
-    public class MultiLineString
+    public class LineString
     {
         public List<Points> lineString = null;
-        public MultiLineString(Points points1)
+        public LineString(Points points1)
         {
             lineString = new List<Points> { points1 };
         }
     }
 
-    public class MultiPolygon
+    public class Polygon
     {
         public List<Points> polygon = null;
-        public MultiPolygon(Points points1)
+        public Polygon(Points points1)
         {
             polygon = new List<Points> { points1 };
         }
