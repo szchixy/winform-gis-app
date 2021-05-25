@@ -33,6 +33,9 @@ namespace WindowsFormsApp1
         private MultiLineString multiLineString = null;
         private MultiPolygon multiPolygon = null;
 
+        private string inputJsonText = null;
+        private string outputJsonText = null;
+
         public Form1()
         {
             InitializeComponent();
@@ -250,7 +253,7 @@ namespace WindowsFormsApp1
             {
                 using (StreamReader sr = new StreamReader(openFileDialog1.FileName))
                 {
-                    string inputJsonText = sr.ReadToEnd();
+                    inputJsonText = sr.ReadToEnd();
                     textBox1.Text = inputJsonText;
                 }
             }
@@ -274,14 +277,14 @@ namespace WindowsFormsApp1
                     for (int i = 0; i < multiPolygon.polygon.Count; i++)
                         featureCollection.features.Add(MultiPolygon2Json(multiPolygon.polygon[i]));
 
-                string resultJsonText = JsonConvert.SerializeObject(featureCollection);
-                textBox1.Text = resultJsonText;
+                outputJsonText = JsonConvert.SerializeObject(featureCollection);
+                textBox1.Text = outputJsonText;
 
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     using (StreamWriter sw = new StreamWriter(saveFileDialog1.FileName))
                     {
-                        sw.Write(resultJsonText);
+                        sw.Write(outputJsonText);
                     }
                 }
             }
