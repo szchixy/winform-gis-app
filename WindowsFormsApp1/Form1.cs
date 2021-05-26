@@ -19,7 +19,8 @@ namespace WindowsFormsApp1
         public Graphics graph;
         private Pen pen;
         private Brush brush;
-        Color color = Color.Black;
+        Color paintColor = Color.Black;
+        int penSize;
         private int x = -1;
         private int y = -1;
         
@@ -39,14 +40,14 @@ namespace WindowsFormsApp1
             InitializeComponent();
             graph = panel1.CreateGraphics();
             graph.SmoothingMode = SmoothingMode.HighQuality;
-            pen = new Pen(color, 2);
-            brush = new SolidBrush(color);
+            penSize = 2;
+            pen = new Pen(paintColor, penSize);
+            brush = new SolidBrush(paintColor);
             pen.StartCap = pen.EndCap = LineCap.Round;
             status = process.Nothing;
             listStatus.SelectedIndex = 0;
-            boxColor.BackColor = color;
+            boxColor.BackColor = paintColor;
         }
-
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -73,7 +74,7 @@ namespace WindowsFormsApp1
                             pointList.Add(e.Location);
                             ++pointListCount;
                             if (pointListCount == 2)
-                                graph.DrawLine(new Pen(color, 2), new Point(x, y), e.Location);
+                                graph.DrawLine(new Pen(paintColor, penSize), new Point(x, y), e.Location);
                             else if (pointListCount >= 3)
                                 graph.FillPolygon(brush, pointList.ToArray());
                             break;
@@ -91,7 +92,7 @@ namespace WindowsFormsApp1
 
                     // 存储对象
                     if(status != process.FreePen)
-                        featureCollection.features.Add(Geometry2JObject(new Points(pointList, color), status.ToString()));
+                        featureCollection.features.Add(Geometry2JObject(new Points(pointList, paintColor), status.ToString()));
 
                     switch (status)
                     {
@@ -216,12 +217,12 @@ namespace WindowsFormsApp1
         {
             if (geoType == "MultiPoint")
             {
-                Pen pen1 = new Pen(points.color, 2);
+                Pen pen1 = new Pen(points.color, penSize);
                 for (int i = 0; i < points.point.Count; i++)
                     graph.DrawEllipse(pen1, new Rectangle(points.point[i].X - 1, points.point[i].Y - 1, 2, 2));
             }
             else if (geoType == "LineString")
-                graph.DrawLines(new Pen(points.color, 2), points.point.ToArray());
+                graph.DrawLines(new Pen(points.color, penSize), points.point.ToArray());
             else if (geoType == "Polygon")
                 graph.FillPolygon(new SolidBrush(points.color), points.point.ToArray());
         }
@@ -248,10 +249,10 @@ namespace WindowsFormsApp1
             DialogResult dr = colorDialog1.ShowDialog();
             if (dr == DialogResult.OK)
             {
-                color = colorDialog1.Color;
-                boxColor.BackColor = color;
-                pen.Color = color;
-                brush = new SolidBrush(color);
+                paintColor = colorDialog1.Color;
+                boxColor.BackColor = paintColor;
+                pen.Color = paintColor;
+                brush = new SolidBrush(paintColor);
             }
         }
 
