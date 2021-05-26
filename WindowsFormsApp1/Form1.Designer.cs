@@ -32,7 +32,6 @@ namespace WindowsFormsApp1
             this.listStatus = new System.Windows.Forms.ComboBox();
             this.labelStatus = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.buttonOpen = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.boxColor = new System.Windows.Forms.PictureBox();
@@ -88,7 +87,6 @@ namespace WindowsFormsApp1
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.textBox1);
             this.splitContainer1.Panel1.Controls.Add(this.buttonOpen);
             this.splitContainer1.Panel1.Controls.Add(this.buttonSave);
             this.splitContainer1.Panel1.Controls.Add(this.boxColor);
@@ -102,14 +100,6 @@ namespace WindowsFormsApp1
             this.splitContainer1.Size = new System.Drawing.Size(994, 661);
             this.splitContainer1.SplitterDistance = 42;
             this.splitContainer1.TabIndex = 4;
-            // 
-            // textBox1
-            // 
-            this.textBox1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textBox1.Location = new System.Drawing.Point(577, 12);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(339, 23);
-            this.textBox1.TabIndex = 7;
             // 
             // buttonOpen
             // 
@@ -207,7 +197,6 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Label labelColor;
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.Button buttonOpen;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }

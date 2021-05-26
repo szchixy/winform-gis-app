@@ -266,7 +266,6 @@ namespace WindowsFormsApp1
                 using (StreamReader sr = new StreamReader(openFileDialog1.FileName))
                 {
                     inputJsonText = sr.ReadToEnd();
-                    textBox1.Text = inputJsonText;
                     featureCollection = JsonConvert.DeserializeObject<FeatureCollection>(inputJsonText);
                     DrawFeatureCollection();
                 }
@@ -278,7 +277,6 @@ namespace WindowsFormsApp1
             if (featureCollection.features.Count != 0)
             {
                 outputJsonText = JsonConvert.SerializeObject(featureCollection);
-                textBox1.Text = outputJsonText;
 
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
