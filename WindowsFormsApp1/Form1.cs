@@ -140,7 +140,7 @@ namespace WindowsFormsApp1
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (drawing && e.Button == MouseButtons.Left)
+            if (drawing)
             {
                 switch (status)
                 {
