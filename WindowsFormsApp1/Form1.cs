@@ -36,7 +36,7 @@ namespace WindowsFormsApp1
             graph = panel1.CreateGraphics();
             graph.SmoothingMode = SmoothingMode.HighQuality;
             paintColor = Color.Black;
-            penSize = 1;
+            penSize = 2;
             pen = new Pen(paintColor, penSize);
             pen.StartCap = pen.EndCap = LineCap.Round;
             brush = new SolidBrush(paintColor);

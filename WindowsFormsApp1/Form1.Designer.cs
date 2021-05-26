@@ -166,7 +166,7 @@ namespace WindowsFormsApp1
             this.BarPenSize.Name = "BarPenSize";
             this.BarPenSize.Size = new System.Drawing.Size(141, 45);
             this.BarPenSize.TabIndex = 7;
-            this.BarPenSize.Value = 1;
+            this.BarPenSize.Value = 2;
             this.BarPenSize.ValueChanged += new System.EventHandler(this.BarPenSize_ValueChanged);
             // 
             // panel1
