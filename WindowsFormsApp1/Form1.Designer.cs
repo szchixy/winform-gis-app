@@ -160,6 +160,7 @@ namespace WindowsFormsApp1
             // 
             // BarPenSize
             // 
+            this.BarPenSize.LargeChange = 1;
             this.BarPenSize.Location = new System.Drawing.Point(499, 12);
             this.BarPenSize.Minimum = 1;
             this.BarPenSize.Name = "BarPenSize";
@@ -200,6 +201,7 @@ namespace WindowsFormsApp1
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
