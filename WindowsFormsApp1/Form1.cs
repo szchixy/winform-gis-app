@@ -12,10 +12,10 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         public Graphics graph;
+        Color paintColor;
+        int penSize;
         private Pen pen;
         private Brush brush;
-        Color paintColor = Color.Black;
-        int penSize;
         private int x = -1;
         private int y = -1;
         
@@ -27,22 +27,26 @@ namespace WindowsFormsApp1
         private int pointListCount = 0;
         private FeatureCollection featureCollection = null;
 
-        private string inputJsonText = null;
-        private string outputJsonText = null;
+        private string inputJsonText = "";
+        private string outputJsonText = "";
 
         public Form1()
         {
             InitializeComponent();
             graph = panel1.CreateGraphics();
             graph.SmoothingMode = SmoothingMode.HighQuality;
-            penSize = 2;
+            paintColor = Color.Black;
+            penSize = 1;
             pen = new Pen(paintColor, penSize);
-            brush = new SolidBrush(paintColor);
             pen.StartCap = pen.EndCap = LineCap.Round;
-            status = process.Nothing;
-            drawing = false;
+            brush = new SolidBrush(paintColor);
+
             listStatus.SelectedIndex = 0;
             boxColor.BackColor = paintColor;
+            BarPenSize.Value = penSize;
+
+            status = process.Nothing;
+            drawing = false;
 
             featureCollection = new FeatureCollection();
         }
@@ -59,7 +63,7 @@ namespace WindowsFormsApp1
                     switch (status)
                     {
                         case process.MultiPoint:
-                            graph.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
+                            graph.FillEllipse(brush, new Rectangle(e.X - penSize, e.Y - penSize, penSize * 2 - 1, penSize * 2 - 1));
                             pointList.Add(e.Location);
                             break;
                         case process.LineString:
@@ -72,7 +76,7 @@ namespace WindowsFormsApp1
                             pointList.Add(e.Location);
                             ++pointListCount;
                             if (pointListCount == 2)
-                                graph.DrawLine(new Pen(paintColor, penSize), new Point(x, y), e.Location);
+                                graph.DrawLine(new Pen(paintColor, 2), new Point(x, y), e.Location);
                             else if (pointListCount >= 3)
                                 graph.FillPolygon(brush, pointList.ToArray());
                             break;
@@ -84,24 +88,16 @@ namespace WindowsFormsApp1
                 //
                 else if(e.Button == MouseButtons.Right)
                 {
-                    drawing = false;
-                    listStatus.Enabled = true;
-                    boxColor.Enabled = true;
+                    ChangeEnable(true);
 
                     // 存储对象
-                    if(status != process.FreePen)
-                        featureCollection.features.Add(Geometry2JObject(new Points(pointList, paintColor), status.ToString()));
+                    if (status != process.FreePen)
+                        featureCollection.features.Add(Geometry2JObject(new Points(pointList, paintColor, penSize), status.ToString()));
 
                     switch (status)
                     {
                         case process.MultiPoint:
-                            pointListCount = 0;
-                            pointList = null;
-                            break;
                         case process.LineString:                           
-                            pointListCount = 0;
-                            pointList = null;
-                            break;
                         case process.Polygon:
                             pointListCount = 0;
                             pointList = null;
@@ -115,13 +111,11 @@ namespace WindowsFormsApp1
                 //
                 // 左键开始
                 //
-                drawing = true;
-                listStatus.Enabled = false;
-                boxColor.Enabled = false;
+                ChangeEnable(false);
                 switch (status)
                 {
                     case process.MultiPoint:
-                        graph.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
+                        graph.FillEllipse(brush, new Rectangle(e.X - penSize, e.Y - penSize, penSize * 2 - 1, penSize * 2 - 1));
                         pointList = new List<Point> { e.Location };
                         break;
                     case process.FreePen:
@@ -171,9 +165,7 @@ namespace WindowsFormsApp1
                     case process.Polygon:
                         break;
                     default:
-                        drawing = false;
-                        listStatus.Enabled = true;
-                        boxColor.Enabled = true;
+                        ChangeEnable(true);
                         break;
                 }
             }
@@ -190,11 +182,15 @@ namespace WindowsFormsApp1
             {
                 foreach (dynamic feature in featureCollection.features)
                 {
-                    dynamic colorArray = feature.properties.color;
+                    dynamic colorArray = feature.properties.paintColor;
                     List<int> colorList = new List<int>();
                     foreach (int i in colorArray)
                         colorList.Add(i);
                     Color color = Color.FromArgb(colorList[0], colorList[1], colorList[2]);
+
+                    int size = 0;
+                    if(feature.geometry.type.ToString() != "Polygon")
+                        size = feature.properties.penSize;
 
                     dynamic coordinatesArray = feature.geometry.coordinates;
                     List<Point> pointList = new List<Point>();
@@ -206,7 +202,7 @@ namespace WindowsFormsApp1
                         pointList.Add(new Point(xy[0], xy[1]));
                     }
 
-                    DrawFeature(new Points(pointList, color), feature.geometry.type.ToString());
+                    DrawFeature(new Points(pointList, color, size), feature.geometry.type.ToString());
                 }
             }
         }
@@ -214,13 +210,10 @@ namespace WindowsFormsApp1
         private void DrawFeature(Points points, string geoType)
         {
             if (geoType == "MultiPoint")
-            {
-                Pen pen1 = new Pen(points.color, penSize);
                 for (int i = 0; i < points.point.Count; i++)
-                    graph.DrawEllipse(pen1, new Rectangle(points.point[i].X - 1, points.point[i].Y - 1, 2, 2));
-            }
+                    graph.FillEllipse(new SolidBrush(points.color), new Rectangle(points.point[i].X - points.size, points.point[i].Y - points.size, points.size * 2 - 1, points.size * 2 - 1));
             else if (geoType == "LineString")
-                graph.DrawLines(new Pen(points.color, penSize), points.point.ToArray());
+                graph.DrawLines(new Pen(points.color, points.size), points.point.ToArray());
             else if (geoType == "Polygon")
                 graph.FillPolygon(new SolidBrush(points.color), points.point.ToArray());
         }
@@ -240,6 +233,12 @@ namespace WindowsFormsApp1
                 panel1.Cursor = Cursors.Cross;
             else
                 panel1.Cursor = Cursors.Default;
+        }
+
+        private void BarPenSize_ValueChanged(object sender, EventArgs e)
+        {
+            penSize = BarPenSize.Value;
+            pen.Width = penSize;
         }
 
         private void boxColor_Click(object sender, EventArgs e)
@@ -283,15 +282,27 @@ namespace WindowsFormsApp1
             }
         }
 
+        private void ChangeEnable(bool isEnable)
+        {
+            drawing = !isEnable;
+            listStatus.Enabled = isEnable;
+            boxColor.Enabled = isEnable;
+            BarPenSize.Enabled = isEnable;
+            buttonOpen.Enabled = isEnable;
+            buttonSave.Enabled = isEnable;
+        }
+
         private JObject Geometry2JObject(Points points, string geoType)
         {
             dynamic jo = new JObject();
             jo.type = "Feature";
             jo.properties = new JObject();
-            jo.properties.color = new JArray();
-            jo.properties.color.Add(points.color.R);
-            jo.properties.color.Add(points.color.G);
-            jo.properties.color.Add(points.color.B);
+            jo.properties.paintColor = new JArray();
+            jo.properties.paintColor.Add(points.color.R);
+            jo.properties.paintColor.Add(points.color.G);
+            jo.properties.paintColor.Add(points.color.B);
+            if (geoType != "Polygon")
+                jo.properties.penSize = points.size;
             jo.geometry = new JObject();
             jo.geometry.type = geoType;
             jo.geometry.coordinates = new JArray();
@@ -310,10 +321,12 @@ namespace WindowsFormsApp1
     {
         public List<Point> point = null;
         public Color color;
-        public Points(List<Point> point1, Color color1)
+        public int size;
+        public Points(List<Point> point1, Color color1, int size1)
         {
             point = new List<Point>(point1);
             color = color1;
+            size = size1;
         }
     }
 
