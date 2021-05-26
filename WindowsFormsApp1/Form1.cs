@@ -26,11 +26,11 @@ namespace WindowsFormsApp1
         
         private enum process {Nothing, FreePen, MultiPoint, LineString, Polygon};
         private process status;
-        private bool drawing = false;
+        private bool drawing;
 
         private List<Point> pointList = null;
         private int pointListCount = 0;
-        private FeatureCollection featureCollection = new FeatureCollection();
+        private FeatureCollection featureCollection = null;
 
         private string inputJsonText = null;
         private string outputJsonText = null;
@@ -45,8 +45,11 @@ namespace WindowsFormsApp1
             brush = new SolidBrush(paintColor);
             pen.StartCap = pen.EndCap = LineCap.Round;
             status = process.Nothing;
+            drawing = false;
             listStatus.SelectedIndex = 0;
             boxColor.BackColor = paintColor;
+
+            featureCollection = new FeatureCollection();
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -264,6 +267,8 @@ namespace WindowsFormsApp1
                 {
                     inputJsonText = sr.ReadToEnd();
                     textBox1.Text = inputJsonText;
+                    featureCollection = JsonConvert.DeserializeObject<FeatureCollection>(inputJsonText);
+                    DrawFeatureCollection();
                 }
             }
         }
