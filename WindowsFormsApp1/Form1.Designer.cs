@@ -32,11 +32,12 @@ namespace WindowsFormsApp1
             this.listStatus = new System.Windows.Forms.ComboBox();
             this.labelStatus = new System.Windows.Forms.Label();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.buttonOpen = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
             this.boxColor = new System.Windows.Forms.PictureBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.labelColor = new System.Windows.Forms.Label();
+            this.BarPenSize = new System.Windows.Forms.TrackBar();
             this.panel1 = new System.Windows.Forms.Panel();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -46,6 +47,7 @@ namespace WindowsFormsApp1
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.boxColor)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.BarPenSize)).BeginInit();
             this.SuspendLayout();
             // 
             // listStatus
@@ -88,28 +90,21 @@ namespace WindowsFormsApp1
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.textBox1);
             this.splitContainer1.Panel1.Controls.Add(this.buttonOpen);
             this.splitContainer1.Panel1.Controls.Add(this.buttonSave);
             this.splitContainer1.Panel1.Controls.Add(this.boxColor);
             this.splitContainer1.Panel1.Controls.Add(this.listStatus);
+            this.splitContainer1.Panel1.Controls.Add(this.label1);
             this.splitContainer1.Panel1.Controls.Add(this.labelColor);
             this.splitContainer1.Panel1.Controls.Add(this.labelStatus);
+            this.splitContainer1.Panel1.Controls.Add(this.BarPenSize);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
-            this.splitContainer1.Size = new System.Drawing.Size(994, 661);
+            this.splitContainer1.Size = new System.Drawing.Size(998, 724);
             this.splitContainer1.SplitterDistance = 42;
             this.splitContainer1.TabIndex = 4;
-            // 
-            // textBox1
-            // 
-            this.textBox1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textBox1.Location = new System.Drawing.Point(577, 12);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(339, 23);
-            this.textBox1.TabIndex = 7;
             // 
             // buttonOpen
             // 
@@ -143,6 +138,16 @@ namespace WindowsFormsApp1
             this.boxColor.TabStop = false;
             this.boxColor.Click += new System.EventHandler(this.boxColor_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Location = new System.Drawing.Point(447, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(46, 21);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "线宽:";
+            // 
             // labelColor
             // 
             this.labelColor.AutoSize = true;
@@ -153,6 +158,17 @@ namespace WindowsFormsApp1
             this.labelColor.TabIndex = 3;
             this.labelColor.Text = "颜色:";
             // 
+            // BarPenSize
+            // 
+            this.BarPenSize.LargeChange = 1;
+            this.BarPenSize.Location = new System.Drawing.Point(499, 12);
+            this.BarPenSize.Minimum = 1;
+            this.BarPenSize.Name = "BarPenSize";
+            this.BarPenSize.Size = new System.Drawing.Size(141, 45);
+            this.BarPenSize.TabIndex = 7;
+            this.BarPenSize.Value = 2;
+            this.BarPenSize.ValueChanged += new System.EventHandler(this.BarPenSize_ValueChanged);
+            // 
             // panel1
             // 
             this.panel1.AutoSize = true;
@@ -160,7 +176,7 @@ namespace WindowsFormsApp1
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(994, 615);
+            this.panel1.Size = new System.Drawing.Size(998, 678);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
@@ -180,11 +196,12 @@ namespace WindowsFormsApp1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(994, 661);
+            this.ClientSize = new System.Drawing.Size(998, 724);
             this.Controls.Add(this.splitContainer1);
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
@@ -193,6 +210,7 @@ namespace WindowsFormsApp1
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.boxColor)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.BarPenSize)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -207,9 +225,10 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.Label labelColor;
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.Button buttonOpen;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.TrackBar BarPenSize;
+        private System.Windows.Forms.Label label1;
     }
 }
 

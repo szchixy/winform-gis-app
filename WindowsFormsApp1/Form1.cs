@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Newtonsoft.Json.Linq;
@@ -17,53 +12,45 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         public Graphics graph;
+        Color paintColor;
+        int penSize;
         private Pen pen;
         private Brush brush;
-        Color color = Color.Black;
         private int x = -1;
         private int y = -1;
         
         private enum process {Nothing, FreePen, MultiPoint, LineString, Polygon};
         private process status;
-        private bool drawing = false;
+        private bool drawing;
 
         private List<Point> pointList = null;
         private int pointListCount = 0;
-        private MultiPoint multiPoint = null;
-        private LineString lineString = null;
-        private Polygon polygon = null;
 
-        private string inputJsonText = null;
-        private string outputJsonText = null;
+        public List<Geometry> geometryList = null;
+        private FeatureCollection featureCollection = null;
+
+        private string inputJsonText = "";
+        private string outputJsonText = "";
 
         public Form1()
         {
             InitializeComponent();
             graph = panel1.CreateGraphics();
             graph.SmoothingMode = SmoothingMode.HighQuality;
-            pen = new Pen(color, 2);
-            brush = new SolidBrush(color);
+            paintColor = Color.Black;
+            penSize = 2;
+            pen = new Pen(paintColor, penSize);
             pen.StartCap = pen.EndCap = LineCap.Round;
-            status = process.Nothing;
+            brush = new SolidBrush(paintColor);
+
             listStatus.SelectedIndex = 0;
-            boxColor.BackColor = color;
-        }
+            boxColor.BackColor = paintColor;
+            BarPenSize.Value = penSize;
 
-        private void DrawPoints(Points points)
-        {
-            Pen pen1 = new Pen(points.color, 2);
-            for (int i = 0; i < points.point.Count; i++)
-                graph.DrawEllipse(pen1, new Rectangle(points.point[i].X - 1, points.point[i].Y - 1, 2, 2));
-        }
+            status = process.Nothing;
+            drawing = false;
 
-        private void DrawLineString(Points points)
-        {
-            graph.DrawLines(new Pen(points.color, 2), points.point.ToArray());
-        }
-
-        private void DrawPolygon(Points points)
-        {
-            graph.FillPolygon(new SolidBrush(points.color), points.point.ToArray());
+            geometryList = new List<Geometry>();
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -78,7 +65,7 @@ namespace WindowsFormsApp1
                     switch (status)
                     {
                         case process.MultiPoint:
-                            graph.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
+                            graph.FillEllipse(brush, new Rectangle(e.X - penSize, e.Y - penSize, penSize * 2 - 1, penSize * 2 - 1));
                             pointList.Add(e.Location);
                             break;
                         case process.LineString:
@@ -91,7 +78,7 @@ namespace WindowsFormsApp1
                             pointList.Add(e.Location);
                             ++pointListCount;
                             if (pointListCount == 2)
-                                graph.DrawLine(new Pen(color, 2), new Point(x, y), e.Location);
+                                graph.DrawLine(new Pen(paintColor, 2), new Point(x, y), e.Location);
                             else if (pointListCount >= 3)
                                 graph.FillPolygon(brush, pointList.ToArray());
                             break;
@@ -103,32 +90,20 @@ namespace WindowsFormsApp1
                 //
                 else if(e.Button == MouseButtons.Right)
                 {
-                    drawing = false;
-                    listStatus.Enabled = true;
-                    boxColor.Enabled = true;
+                    ChangeEnable(true);
+
                     switch (status)
                     {
                         case process.MultiPoint:
-                            if (multiPoint == null)
-                                multiPoint = new MultiPoint(new Points(pointList, color));
-                            else
-                                multiPoint.point.Add(new Points(pointList, color));
-                            pointListCount = 0;
-                            pointList = null;
-                            break;
                         case process.LineString:
-                            if (lineString == null)
-                                lineString = new LineString(new Points(pointList, color));
-                            else
-                                lineString.lineString.Add(new Points(pointList, color));
+                            geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
                             pointListCount = 0;
                             pointList = null;
                             break;
                         case process.Polygon:
-                            if (polygon == null)
-                                polygon = new Polygon(new Points(pointList, color));
-                            else
-                                polygon.polygon.Add(new Points(pointList, color));
+                            // 形成polygon闭环
+                            pointList.Add(pointList[0]);
+                            geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
                             pointListCount = 0;
                             pointList = null;
                             break;
@@ -141,13 +116,11 @@ namespace WindowsFormsApp1
                 //
                 // 左键开始
                 //
-                drawing = true;
-                listStatus.Enabled = false;
-                boxColor.Enabled = false;
+                ChangeEnable(false);
                 switch (status)
                 {
                     case process.MultiPoint:
-                        graph.DrawEllipse(pen, new Rectangle(e.X - 1, e.Y - 1, 2, 2));
+                        graph.FillEllipse(brush, new Rectangle(e.X - penSize, e.Y - penSize, penSize * 2 - 1, penSize * 2 - 1));
                         pointList = new List<Point> { e.Location };
                         break;
                     case process.FreePen:
@@ -172,7 +145,7 @@ namespace WindowsFormsApp1
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (drawing && e.Button == MouseButtons.Left)
+            if (drawing)
             {
                 switch (status)
                 {
@@ -197,17 +170,35 @@ namespace WindowsFormsApp1
                     case process.Polygon:
                         break;
                     default:
-                        drawing = false;
-                        listStatus.Enabled = true;
-                        boxColor.Enabled = true;
+                        ChangeEnable(true);
                         break;
                 }
             }
         }
 
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+            DrawGeometryList();
+        }
+
+        private void DrawGeometryList()
+        {
+            if(geometryList.Count != 0)
+                for (int i = 0; i < geometryList.Count; i++)
+                {
+                    if (geometryList[i].geoType == "MultiPoint")
+                        for (int j = 0; j < geometryList[i].point.Count; j++)
+                            graph.FillEllipse(new SolidBrush(geometryList[i].color), new Rectangle(geometryList[i].point[j].X - geometryList[i].size, geometryList[i].point[j].Y - geometryList[i].size, geometryList[i].size * 2 - 1, geometryList[i].size * 2 - 1));
+                    else if (geometryList[i].geoType == "LineString")
+                        graph.DrawLines(new Pen(geometryList[i].color, geometryList[i].size), geometryList[i].point.ToArray());
+                    else if (geometryList[i].geoType == "Polygon")
+                        graph.FillPolygon(new SolidBrush(geometryList[i].color), geometryList[i].point.ToArray());
+                }
+        }
+
         private void ListStatus_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch(listStatus.SelectedIndex)
+            switch (listStatus.SelectedIndex)
             {
                 case 0: status = process.Nothing; break;
                 case 1: status = process.FreePen; break;
@@ -216,23 +207,16 @@ namespace WindowsFormsApp1
                 case 4: status = process.Polygon; break;
                 default: break;
             }
-            if(status != process.Nothing)
+            if (status != process.Nothing)
                 panel1.Cursor = Cursors.Cross;
             else
                 panel1.Cursor = Cursors.Default;
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
+        private void BarPenSize_ValueChanged(object sender, EventArgs e)
         {
-            if (multiPoint != null)
-                for (int i = 0; i < multiPoint.point.Count; i++)
-                    DrawPoints(multiPoint.point[i]);
-            if (lineString != null)
-                for (int i = 0; i < lineString.lineString.Count; i++)
-                    DrawLineString(lineString.lineString[i]);
-            if (polygon != null)
-                for (int i = 0; i < polygon.polygon.Count; i++)
-                    DrawPolygon(polygon.polygon[i]);
+            penSize = BarPenSize.Value;
+            pen.Width = penSize;
         }
 
         private void boxColor_Click(object sender, EventArgs e)
@@ -240,10 +224,10 @@ namespace WindowsFormsApp1
             DialogResult dr = colorDialog1.ShowDialog();
             if (dr == DialogResult.OK)
             {
-                color = colorDialog1.Color;
-                boxColor.BackColor = color;
-                pen.Color = color;
-                brush = new SolidBrush(color);
+                paintColor = colorDialog1.Color;
+                boxColor.BackColor = paintColor;
+                pen.Color = paintColor;
+                brush = new SolidBrush(paintColor);
             }
         }
 
@@ -254,31 +238,54 @@ namespace WindowsFormsApp1
                 using (StreamReader sr = new StreamReader(openFileDialog1.FileName))
                 {
                     inputJsonText = sr.ReadToEnd();
-                    textBox1.Text = inputJsonText;
+                    featureCollection = JsonConvert.DeserializeObject<FeatureCollection>(inputJsonText);
+                    //
+                    // 解析json
+                    //
+                    if (featureCollection.features.Count != 0)
+                    {
+                        geometryList = new List<Geometry>();
+
+                        foreach (dynamic feature in featureCollection.features)
+                        {
+                            dynamic colorArray = feature.properties.paintColor;
+                            List<int> colorList = new List<int>();
+                            foreach (int i in colorArray)
+                                colorList.Add(i);
+                            Color color = Color.FromArgb(colorList[0], colorList[1], colorList[2]);
+
+                            int size = 0;
+                            if (feature.geometry.type.ToString() != "Polygon")
+                                size = feature.properties.penSize;
+
+                            dynamic coordinatesArray = feature.geometry.coordinates;
+                            List<Point> pointList = new List<Point>();
+                            foreach (dynamic pointArray in coordinatesArray)
+                            {
+                                List<int> xy = new List<int>();
+                                foreach (int i in pointArray)
+                                    xy.Add(i);
+                                pointList.Add(new Point(xy[0], xy[1]));
+                            }
+
+                            geometryList.Add(new Geometry(pointList, color, size, feature.geometry.type.ToString()));
+                        }
+
+                        graph.Clear(Color.White);
+                        DrawGeometryList();
+                    }
                 }
             }
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if (multiPoint != null || lineString != null || polygon != null)
+            if(geometryList.Count != 0)
             {
-                dynamic featureCollection = new JObject();
-                featureCollection.type = "FeatureCollection";
-                featureCollection.features = new JArray();
-
-                if (multiPoint != null)
-                    for (int i = 0; i < multiPoint.point.Count; i++)
-                        featureCollection.features.Add(MultiPoint2Json(multiPoint.point[i]));
-                if (lineString != null)
-                    for (int i = 0; i < lineString.lineString.Count; i++)
-                        featureCollection.features.Add(MultiLineString2Json(lineString.lineString[i]));
-                if (polygon != null)
-                    for (int i = 0; i < polygon.polygon.Count; i++)
-                        featureCollection.features.Add(MultiPolygon2Json(polygon.polygon[i]));
-
+                featureCollection = new FeatureCollection();
+                for(int i = 0; i < geometryList.Count; i++)
+                    featureCollection.features.Add(Geometry2JObject(geometryList[i]));
                 outputJsonText = JsonConvert.SerializeObject(featureCollection);
-                textBox1.Text = outputJsonText;
 
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
@@ -290,109 +297,64 @@ namespace WindowsFormsApp1
             }
         }
 
-        private JObject MultiPoint2Json(Points points)
+        private void ChangeEnable(bool isEnable)
+        {
+            drawing = !isEnable;
+            listStatus.Enabled = isEnable;
+            boxColor.Enabled = isEnable;
+            BarPenSize.Enabled = isEnable;
+            buttonOpen.Enabled = isEnable;
+            buttonSave.Enabled = isEnable;
+        }
+
+        private JObject Geometry2JObject(Geometry geometry)
         {
             dynamic jo = new JObject();
             jo.type = "Feature";
             jo.properties = new JObject();
-            jo.properties.color = new JArray();
-            jo.properties.color.Add(points.color.R);
-            jo.properties.color.Add(points.color.G);
-            jo.properties.color.Add(points.color.B);
+            jo.properties.paintColor = new JArray();
+            jo.properties.paintColor.Add(geometry.color.R);
+            jo.properties.paintColor.Add(geometry.color.G);
+            jo.properties.paintColor.Add(geometry.color.B);
+            if (geometry.geoType != "Polygon")
+                jo.properties.penSize = geometry.size;
             jo.geometry = new JObject();
-            jo.geometry.type = "MultiPoint";
+            jo.geometry.type = geometry.geoType;
             jo.geometry.coordinates = new JArray();
-            for (int i = 0; i < points.point.Count; i++)
+            for (int i = 0; i < geometry.point.Count; i++)
             {
                 dynamic point = new JArray();
-                point.Add(points.point[i].X);
-                point.Add(points.point[i].Y);
+                point.Add(geometry.point[i].X);
+                point.Add(geometry.point[i].Y);
                 jo.geometry.coordinates.Add(point);
             }
             return jo;
         }
-
-        private JObject MultiLineString2Json(Points points)
-        {
-            dynamic jo = new JObject();
-            jo.type = "Feature";
-            jo.properties = new JObject();
-            jo.properties.color = new JArray();
-            jo.properties.color.Add(points.color.R);
-            jo.properties.color.Add(points.color.G);
-            jo.properties.color.Add(points.color.B);
-            jo.geometry = new JObject();
-            jo.geometry.type = "MultiLineString";
-            jo.geometry.coordinates = new JArray();
-            for (int i = 0; i < points.point.Count; i++)
-            {
-                dynamic point = new JArray();
-                point.Add(points.point[i].X);
-                point.Add(points.point[i].Y);
-                jo.geometry.coordinates.Add(point);
-            }
-            return jo;
-        }
-
-        private JObject MultiPolygon2Json(Points points)
-        {
-            dynamic jo = new JObject();
-            jo.type = "Feature";
-            jo.properties = new JObject();
-            jo.properties.color = new JArray();
-            jo.properties.color.Add(points.color.R);
-            jo.properties.color.Add(points.color.G);
-            jo.properties.color.Add(points.color.B);
-            jo.geometry = new JObject();
-            jo.geometry.type = "MultiPolygon";
-            jo.geometry.coordinates = new JArray();
-            for (int i = 0; i < points.point.Count; i++)
-            {
-                dynamic point = new JArray();
-                point.Add(points.point[i].X);
-                point.Add(points.point[i].Y);
-                jo.geometry.coordinates.Add(point);
-            }
-            return jo;
-        }
-
     }
 
-    public class Points
+    public class Geometry
     {
         public List<Point> point = null;
         public Color color;
-        public Points(List<Point> point1, Color color1)
+        public int size;
+        public string geoType;
+        public Geometry(List<Point> point1, Color color1, int size1, string geoType1)
         {
             point = new List<Point>(point1);
             color = color1;
+            size = size1;
+            geoType = geoType1;
         }
     }
-
-    public class MultiPoint
+    
+    public class FeatureCollection
     {
-        public List<Points> point = null;
-        public MultiPoint(Points points1)
+        public string type = "";
+        public JArray features = null;
+        public FeatureCollection()
         {
-            point = new List<Points> { points1 };
-        }
-    }
-
-    public class LineString
-    {
-        public List<Points> lineString = null;
-        public LineString(Points points1)
-        {
-            lineString = new List<Points> { points1 };
-        }
-    }
-
-    public class Polygon
-    {
-        public List<Points> polygon = null;
-        public Polygon(Points points1)
-        {
-            polygon = new List<Points> { points1 };
+            type = "FeatureCollection";
+            features = new JArray();
         }
     }
 }
