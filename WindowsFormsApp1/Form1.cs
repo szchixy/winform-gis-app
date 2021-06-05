@@ -92,15 +92,18 @@ namespace WindowsFormsApp1
                 {
                     ChangeEnable(true);
 
-                    // 存储对象
-                    if (status != process.FreePen)
-                        geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
-
                     switch (status)
                     {
                         case process.MultiPoint:
-                        case process.LineString:                           
+                        case process.LineString:
+                            geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
+                            pointListCount = 0;
+                            pointList = null;
+                            break;
                         case process.Polygon:
+                            // 形成polygon闭环
+                            pointList.Add(pointList[0]);
+                            geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
                             pointListCount = 0;
                             pointList = null;
                             break;
