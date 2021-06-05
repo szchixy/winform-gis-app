@@ -175,25 +175,22 @@ namespace WindowsFormsApp1
 
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            DrawGeometryList(geometryList);
+            DrawGeometryList();
         }
 
-        private void DrawGeometryList(List<Geometry> geometryList1)
+        private void DrawGeometryList()
         {
             if(geometryList.Count != 0)
-                for (int i = 0; i < geometryList1.Count; i++)
-                    DrawGeometry(geometryList1[i]);
-        }
-
-        private void DrawGeometry(Geometry geometry)
-        {
-            if (geometry.geoType == "MultiPoint")
-                for (int i = 0; i < geometry.point.Count; i++)
-                    graph.FillEllipse(new SolidBrush(geometry.color), new Rectangle(geometry.point[i].X - geometry.size, geometry.point[i].Y - geometry.size, geometry.size * 2 - 1, geometry.size * 2 - 1));
-            else if (geometry.geoType == "LineString")
-                graph.DrawLines(new Pen(geometry.color, geometry.size), geometry.point.ToArray());
-            else if (geometry.geoType == "Polygon")
-                graph.FillPolygon(new SolidBrush(geometry.color), geometry.point.ToArray());
+                for (int i = 0; i < geometryList.Count; i++)
+                {
+                    if (geometryList[i].geoType == "MultiPoint")
+                        for (int j = 0; j < geometryList[i].point.Count; j++)
+                            graph.FillEllipse(new SolidBrush(geometryList[i].color), new Rectangle(geometryList[i].point[j].X - geometryList[i].size, geometryList[i].point[j].Y - geometryList[i].size, geometryList[i].size * 2 - 1, geometryList[i].size * 2 - 1));
+                    else if (geometryList[i].geoType == "LineString")
+                        graph.DrawLines(new Pen(geometryList[i].color, geometryList[i].size), geometryList[i].point.ToArray());
+                    else if (geometryList[i].geoType == "Polygon")
+                        graph.FillPolygon(new SolidBrush(geometryList[i].color), geometryList[i].point.ToArray());
+                }
         }
 
         private void ListStatus_SelectedIndexChanged(object sender, EventArgs e)
@@ -272,7 +269,7 @@ namespace WindowsFormsApp1
                         }
 
                         graph.Clear(Color.White);
-                        DrawGeometryList(geometryList);
+                        DrawGeometryList();
                     }
                 }
             }
