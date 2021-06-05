@@ -92,17 +92,15 @@ namespace WindowsFormsApp1
                 {
                     ChangeEnable(true);
 
+                    // 形成polygon闭环
+                    if(status == process.Polygon)
+                        pointList.Add(pointList[0]);
+
                     switch (status)
                     {
                         case process.MultiPoint:
                         case process.LineString:
-                            geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
-                            pointListCount = 0;
-                            pointList = null;
-                            break;
                         case process.Polygon:
-                            // 形成polygon闭环
-                            pointList.Add(pointList[0]);
                             geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
                             pointListCount = 0;
                             pointList = null;
