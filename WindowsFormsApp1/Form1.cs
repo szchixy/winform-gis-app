@@ -25,6 +25,8 @@ namespace WindowsFormsApp1
 
         private List<Point> pointList = null;
         private int pointListCount = 0;
+
+        public List<Geometry> geometryList = null;
         private FeatureCollection featureCollection = null;
 
         private string inputJsonText = "";
@@ -48,7 +50,7 @@ namespace WindowsFormsApp1
             status = process.Nothing;
             drawing = false;
 
-            featureCollection = new FeatureCollection();
+            geometryList = new List<Geometry>();
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -92,7 +94,7 @@ namespace WindowsFormsApp1
 
                     // 存储对象
                     if (status != process.FreePen)
-                        featureCollection.features.Add(Geometry2JObject(new Points(pointList, paintColor, penSize), status.ToString()));
+                        geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
 
                     switch (status)
                     {
@@ -173,49 +175,25 @@ namespace WindowsFormsApp1
 
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            DrawFeatureCollection();
+            DrawGeometryList(geometryList);
         }
 
-        private void DrawFeatureCollection()
+        private void DrawGeometryList(List<Geometry> geometryList1)
         {
-            if (featureCollection.features.Count != 0)
-            {
-                foreach (dynamic feature in featureCollection.features)
-                {
-                    dynamic colorArray = feature.properties.paintColor;
-                    List<int> colorList = new List<int>();
-                    foreach (int i in colorArray)
-                        colorList.Add(i);
-                    Color color = Color.FromArgb(colorList[0], colorList[1], colorList[2]);
-
-                    int size = 0;
-                    if(feature.geometry.type.ToString() != "Polygon")
-                        size = feature.properties.penSize;
-
-                    dynamic coordinatesArray = feature.geometry.coordinates;
-                    List<Point> pointList = new List<Point>();
-                    foreach (dynamic pointArray in coordinatesArray)
-                    {
-                        List<int> xy = new List<int>();
-                        foreach (int i in pointArray)
-                            xy.Add(i);
-                        pointList.Add(new Point(xy[0], xy[1]));
-                    }
-
-                    DrawFeature(new Points(pointList, color, size), feature.geometry.type.ToString());
-                }
-            }
+            if(geometryList.Count != 0)
+                for (int i = 0; i < geometryList1.Count; i++)
+                    DrawGeometry(geometryList1[i]);
         }
 
-        private void DrawFeature(Points points, string geoType)
+        private void DrawGeometry(Geometry geometry)
         {
-            if (geoType == "MultiPoint")
-                for (int i = 0; i < points.point.Count; i++)
-                    graph.FillEllipse(new SolidBrush(points.color), new Rectangle(points.point[i].X - points.size, points.point[i].Y - points.size, points.size * 2 - 1, points.size * 2 - 1));
-            else if (geoType == "LineString")
-                graph.DrawLines(new Pen(points.color, points.size), points.point.ToArray());
-            else if (geoType == "Polygon")
-                graph.FillPolygon(new SolidBrush(points.color), points.point.ToArray());
+            if (geometry.geoType == "MultiPoint")
+                for (int i = 0; i < geometry.point.Count; i++)
+                    graph.FillEllipse(new SolidBrush(geometry.color), new Rectangle(geometry.point[i].X - geometry.size, geometry.point[i].Y - geometry.size, geometry.size * 2 - 1, geometry.size * 2 - 1));
+            else if (geometry.geoType == "LineString")
+                graph.DrawLines(new Pen(geometry.color, geometry.size), geometry.point.ToArray());
+            else if (geometry.geoType == "Polygon")
+                graph.FillPolygon(new SolidBrush(geometry.color), geometry.point.ToArray());
         }
 
         private void ListStatus_SelectedIndexChanged(object sender, EventArgs e)
@@ -261,15 +239,52 @@ namespace WindowsFormsApp1
                 {
                     inputJsonText = sr.ReadToEnd();
                     featureCollection = JsonConvert.DeserializeObject<FeatureCollection>(inputJsonText);
-                    DrawFeatureCollection();
+                    //
+                    // 解析json
+                    //
+                    if (featureCollection.features.Count != 0)
+                    {
+                        geometryList = new List<Geometry>();
+
+                        foreach (dynamic feature in featureCollection.features)
+                        {
+                            dynamic colorArray = feature.properties.paintColor;
+                            List<int> colorList = new List<int>();
+                            foreach (int i in colorArray)
+                                colorList.Add(i);
+                            Color color = Color.FromArgb(colorList[0], colorList[1], colorList[2]);
+
+                            int size = 0;
+                            if (feature.geometry.type.ToString() != "Polygon")
+                                size = feature.properties.penSize;
+
+                            dynamic coordinatesArray = feature.geometry.coordinates;
+                            List<Point> pointList = new List<Point>();
+                            foreach (dynamic pointArray in coordinatesArray)
+                            {
+                                List<int> xy = new List<int>();
+                                foreach (int i in pointArray)
+                                    xy.Add(i);
+                                pointList.Add(new Point(xy[0], xy[1]));
+                            }
+
+                            geometryList.Add(new Geometry(pointList, color, size, feature.geometry.type.ToString()));
+                        }
+
+                        graph.Clear(Color.White);
+                        DrawGeometryList(geometryList);
+                    }
                 }
             }
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            if (featureCollection.features.Count != 0)
+            if(geometryList.Count != 0)
             {
+                featureCollection = new FeatureCollection();
+                for(int i = 0; i < geometryList.Count; i++)
+                    featureCollection.features.Add(Geometry2JObject(geometryList[i]));
                 outputJsonText = JsonConvert.SerializeObject(featureCollection);
 
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
@@ -292,44 +307,46 @@ namespace WindowsFormsApp1
             buttonSave.Enabled = isEnable;
         }
 
-        private JObject Geometry2JObject(Points points, string geoType)
+        private JObject Geometry2JObject(Geometry geometry)
         {
             dynamic jo = new JObject();
             jo.type = "Feature";
             jo.properties = new JObject();
             jo.properties.paintColor = new JArray();
-            jo.properties.paintColor.Add(points.color.R);
-            jo.properties.paintColor.Add(points.color.G);
-            jo.properties.paintColor.Add(points.color.B);
-            if (geoType != "Polygon")
-                jo.properties.penSize = points.size;
+            jo.properties.paintColor.Add(geometry.color.R);
+            jo.properties.paintColor.Add(geometry.color.G);
+            jo.properties.paintColor.Add(geometry.color.B);
+            if (geometry.geoType != "Polygon")
+                jo.properties.penSize = geometry.size;
             jo.geometry = new JObject();
-            jo.geometry.type = geoType;
+            jo.geometry.type = geometry.geoType;
             jo.geometry.coordinates = new JArray();
-            for (int i = 0; i < points.point.Count; i++)
+            for (int i = 0; i < geometry.point.Count; i++)
             {
                 dynamic point = new JArray();
-                point.Add(points.point[i].X);
-                point.Add(points.point[i].Y);
+                point.Add(geometry.point[i].X);
+                point.Add(geometry.point[i].Y);
                 jo.geometry.coordinates.Add(point);
             }
             return jo;
         }
     }
 
-    public class Points
+    public class Geometry
     {
         public List<Point> point = null;
         public Color color;
         public int size;
-        public Points(List<Point> point1, Color color1, int size1)
+        public string geoType;
+        public Geometry(List<Point> point1, Color color1, int size1, string geoType1)
         {
             point = new List<Point>(point1);
             color = color1;
             size = size1;
+            geoType = geoType1;
         }
     }
-
+    
     public class FeatureCollection
     {
         public string type = "";
