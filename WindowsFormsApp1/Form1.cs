@@ -101,7 +101,10 @@ namespace WindowsFormsApp1
                         case process.MultiPoint:
                         case process.LineString:
                         case process.Polygon:
+                            
+                            // 保存对象
                             geometryList.Add(new Geometry(pointList, paintColor, penSize, status.ToString()));
+                            
                             pointListCount = 0;
                             pointList = null;
                             break;
